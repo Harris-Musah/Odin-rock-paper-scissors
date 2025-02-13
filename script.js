@@ -49,12 +49,9 @@ function playRound(humanChoice, CompChoice){
 
 // let humanChoice = prompt("Enter your choice 1.Rock , 2. Paper, 3. Scissors");
 
- function playGame(){
     let humanScore = 0;
     let computerScore = 0;
-
-    for(i =0; i<5; i++){
-        let humanChoice = prompt("Enter your choice 1.Rock , 2. Paper, 3. Scissors");
+        let humanChoice = 3;
         CompGuess = getComputerChoice();
         humanGuess = getHumanChoice(humanChoice);        
         play = playRound(humanGuess, CompGuess)
@@ -64,14 +61,14 @@ function playRound(humanChoice, CompChoice){
         }else if (play == "human wins"){
             humanScore += 1;
         }
-    }
-    if(computerScore > humanScore){
-        console.log('computer wins')
-    }else{
-        console.log('you win')
-    }
-    return 'computerScore:' + computerScore + ' humanscore:' + humanScore;
-}
+
+
+    // if(computerScore > humanScore){
+    //     console.log('computer wins')
+    // }else{
+    //     console.log('you win')
+    // }
+    // return 'computerScore:' + computerScore + ' humanscore:' + humanScore;
 
 
 console.log(playGame());
