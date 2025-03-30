@@ -1,100 +1,139 @@
-let humanChoice;
-let choices = document.getElementById("choices");
-let winner = document.getElementById("winner");
-let humanScore = 0;
+// DOM Elements
+const playerScoreElement = document.getElementById("player-score");
+const computerScoreElement = document.getElementById("computer-score");
+const playerChoiceElement = document.getElementById("player-choice");
+const computerChoiceElement = document.getElementById("computer-choice");
+const resultMessageElement = document.getElementById("result-message");
+const resetButton = document.getElementById("reset-btn");
+
+// Game state
+let playerScore = 0;
 let computerScore = 0;
+let isGameActive = true;
 
-const btn_1 = document.querySelector("#btn-1");
-const btn_2 = document.querySelector("#btn-2");
-const btn_3 = document.querySelector("#btn-3");
+// Game buttons
+const gameButtons = document.querySelectorAll(".game-btn");
 
+// Choice icons mapping
+const choiceIcons = {
+  rock: "fa-hand-rock",
+  paper: "fa-hand-paper",
+  scissors: "fa-hand-scissors",
+};
+
+// Initialize game
+function initGame() {
+  playerScore = 0;
+  computerScore = 0;
+  isGameActive = true;
+  updateScore();
+  resetChoices();
+  resultMessageElement.textContent = "Choose your weapon!";
+}
+
+// Reset choices display
+function resetChoices() {
+  playerChoiceElement.innerHTML = "";
+  computerChoiceElement.innerHTML = "";
+}
+
+// Update score display
+function updateScore() {
+  playerScoreElement.textContent = playerScore;
+  computerScoreElement.textContent = computerScore;
+}
+
+// Get computer choice
 function getComputerChoice() {
-  let CompChoice = Math.random();
-  if (CompChoice < 0.33) {
-    return "ROCK";
-  } else if (CompChoice >= 0.33 && CompChoice < 0.66) {
-    return "PAPER";
+  const choices = ["rock", "paper", "scissors"];
+  return choices[Math.floor(Math.random() * choices.length)];
+}
+
+// Display choice
+function displayChoice(choice, element) {
+  element.innerHTML = `<i class="fas ${choiceIcons[choice]}"></i>`;
+}
+
+// Play round
+function playRound(playerChoice, computerChoice) {
+  // Display choices with animation
+  displayChoice(playerChoice, playerChoiceElement);
+  displayChoice(computerChoice, computerChoiceElement);
+
+  // Add shake animation
+  playerChoiceElement.classList.add("shake");
+  computerChoiceElement.classList.add("shake");
+
+  // Remove shake animation after delay
+  setTimeout(() => {
+    playerChoiceElement.classList.remove("shake");
+    computerChoiceElement.classList.remove("shake");
+  }, 500);
+
+  // Determine winner
+  if (playerChoice === computerChoice) {
+    return "draw";
+  } else if (
+    (playerChoice === "rock" && computerChoice === "scissors") ||
+    (playerChoice === "paper" && computerChoice === "rock") ||
+    (playerChoice === "scissors" && computerChoice === "paper")
+  ) {
+    return "player";
   } else {
-    return "SCISSORS";
+    return "computer";
   }
 }
 
-function getHumanChoice(humanChoice) {
-  if (humanChoice == 1) {
-    return "ROCK";
-  } else if (humanChoice == 2) {
-    return "PAPER";
-  } else if (humanChoice == 3) {
-    return "SCISSORS";
-  } else {
-    return "Start and choose between 1 and 3";
+// Update game state
+function updateGameState(result) {
+  if (!isGameActive) return;
+
+  let message = "";
+  switch (result) {
+    case "player":
+      playerScore++;
+      message = "You win! 🎉";
+      break;
+    case "computer":
+      computerScore++;
+      message = "Computer wins! 😢";
+      break;
+    case "draw":
+      message = "It's a draw! 🤝";
+      break;
+  }
+
+  updateScore();
+  resultMessageElement.textContent = message;
+
+  // Check for game end
+  if (playerScore === 5 || computerScore === 5) {
+    isGameActive = false;
+    const winner = playerScore > computerScore ? "You" : "Computer";
+    setTimeout(() => {
+      resultMessageElement.textContent = `${winner} won the game! 🏆`;
+    }, 1000);
   }
 }
 
-function playRound(humanChoice, CompChoice) {
-  if (humanChoice == CompChoice) {
-    choices.innerHTML =
-      "Your choice: " + humanChoice + ", Computer choice: " + CompChoice;
-    return "It's a draw";
-  } else if (humanChoice == "ROCK" && CompChoice == "PAPER") {
-    choices.innerHTML =
-      "Your choice: " + humanChoice + ", Computer choice: " + CompChoice;
-    return "Computer wins";
-  } else if (humanChoice == "PAPER" && CompChoice == "ROCK") {
-    choices.innerHTML =
-      "Your choice: " + humanChoice + ", Computer choice: " + CompChoice;
-    return "Human wins";
-  } else if (humanChoice == "ROCK" && CompChoice == "SCISSORS") {
-    choices.innerHTML =
-      "Your choice: " + humanChoice + ", Computer choice: " + CompChoice;
-    return "Human wins";
-  } else if (humanChoice == "SCISSORS" && CompChoice == "ROCK") {
-    choices.innerHTML =
-      "Your choice: " + humanChoice + ", Computer choice: " + CompChoice;
-    return "Computer wins";
-  } else if (humanChoice == "SCISSORS" && CompChoice == "PAPER") {
-    choices.innerHTML =
-      "Your choice: " + humanChoice + ", Computer choice: " + CompChoice;
-    return "Human wins";
-  } else if (humanChoice == "PAPER" && CompChoice == "SCISSORS") {
-    choices.innerHTML =
-      "Your choice: " + humanChoice + ", Computer choice: " + CompChoice;
-    return "Computer wins";
-  }
+// Handle player choice
+function handlePlayerChoice(choice) {
+  if (!isGameActive) return;
+
+  const computerChoice = getComputerChoice();
+  const result = playRound(choice, computerChoice);
+  updateGameState(result);
 }
 
-btn_1.addEventListener("click", () => {
-  humanChoice = 1;
-  playGame();
+// Event Listeners
+gameButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const choice = button.dataset.choice;
+    handlePlayerChoice(choice);
+  });
 });
 
-btn_2.addEventListener("click", () => {
-  humanChoice = 2;
-  playGame();
-});
+resetButton.addEventListener("click", initGame);
 
-btn_3.addEventListener("click", () => {
-  humanChoice = 3;
-  playGame();
-});
-
-function playGame() {
-  let CompGuess = getComputerChoice();
-  let humanGuess = getHumanChoice(humanChoice);
-  let result = playRound(humanGuess, CompGuess);
-
-  if (result == "Computer wins") {
-    computerScore += 1;
-  } else if (result == "Human wins") {
-    humanScore += 1;
-  }
-
-  winner.innerHTML =
-    "Human Score: " + humanScore + " Computer Score: " + computerScore;
-
-  if (computerScore > humanScore) {
-    console.log("Computer wins");
-  } else {
-    console.log("You win");
-  }
-}
+// Initialize game on load
+initGame();
